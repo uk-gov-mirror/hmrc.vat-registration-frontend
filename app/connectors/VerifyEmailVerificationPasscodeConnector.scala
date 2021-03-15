@@ -22,7 +22,7 @@ import models.external.{EmailAlreadyVerified, EmailVerifiedSuccessfully, MaxAtte
 import play.api.http.Status._
 import play.api.libs.json.Json
 import uk.gov.hmrc.http.{HeaderCarrier, HttpReads, HttpResponse, InternalServerException, NotFoundException}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import connectors.VerifyEmailVerificationPasscodeParser._
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -21,8 +21,8 @@ import javax.inject.{Inject, Singleton}
 import models.external.{AlreadyVerifiedEmailAddress, PasscodeMismatch, PasscodeNotFound, RequestEmailPasscodeResult, RequestEmailPasscodeSuccessful}
 import play.api.http.Status.{CONFLICT, CREATED, NOT_FOUND}
 import play.api.libs.json.Json
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, Upstream4xxResponse}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +40,7 @@ class RequestEmailVerificationPasscodeConnector @Inject()(httpClient: HttpClient
     httpClient.POST(url, jsonBody).map {
       case HttpResponse(CREATED, _, _) => RequestEmailPasscodeSuccessful
     }.recover {
-      case Upstream4xxResponse(_, CONFLICT, _, _) => AlreadyVerifiedEmailAddress
+      case UpstreamErrorResponse(_, CONFLICT, _, _) => AlreadyVerifiedEmailAddress
     }
   }
 

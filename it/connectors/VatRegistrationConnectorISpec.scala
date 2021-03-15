@@ -25,7 +25,7 @@ import models.external.{IncorpStatusEvent, IncorpSubscription, IncorporationInfo
 import play.api.libs.json.JsString
 import play.api.test.Helpers._
 import support.AppAndStubs
-import uk.gov.hmrc.http.Upstream5xxResponse
+import uk.gov.hmrc.http.UpstreamErrorResponse
 
 class VatRegistrationConnectorISpec extends IntegrationSpecBase with AppAndStubs {
 
@@ -84,7 +84,7 @@ class VatRegistrationConnectorISpec extends IntegrationSpecBase with AppAndStubs
         given()
           .vatRegistrationFootprint.fails
 
-        intercept[Upstream5xxResponse] {
+        intercept[UpstreamErrorResponse] {
           await(vatregConnector.createNewRegistration)
         }
       }

@@ -17,7 +17,6 @@
 package repositories
 
 import java.util.UUID
-
 import common.enums.VatRegStatus
 import connectors.KeystoreConnector
 import itutil.{IntegrationSpecBase, WiremockHelper}
@@ -25,9 +24,8 @@ import models.CurrentProfile._
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsObject, Json, OWrites}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import uk.gov.hmrc.http.cache.client.CacheMap
-import uk.gov.hmrc.http.logging.SessionId
 import uk.gov.hmrc.mongo.MongoSpecSupport
 import play.api.test.Helpers._
 import support.AppAndStubs
@@ -46,6 +44,7 @@ class SessionRepositoryISpec extends IntegrationSpecBase with AppAndStubs {
     val connector = app.injector.instanceOf[KeystoreConnector]
     await(repository.drop)
     await(repository.ensureIndexes)
+    implicit val hc = HeaderCarrier()
 
     implicit val jsObjWts: OWrites[JsObject] = OWrites(identity)
 

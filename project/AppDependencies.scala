@@ -23,7 +23,7 @@ object AppDependencies {
 
 private object CompileDependencies {
   private val simpleReactivemongoVersion = "7.31.0-play-26"
-  private val bootstrapVersion = "3.2.0"
+  private val bootstrapVersion = "4.1.0"
   private val timeVersion = "3.19.0"
   private val partialsVersion = "7.1.0-play-26"
   private val cachingClientVersion = "9.2.0-play-26"

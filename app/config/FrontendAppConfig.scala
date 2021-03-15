@@ -38,7 +38,7 @@ trait AppConfig {
 }
 
 @Singleton
-class FrontendAppConfig @Inject()(val servicesConfig: ServicesConfig, runModeConfiguration: Configuration) extends AppConfig with FeatureSwitching {
+class FrontendAppConfig @Inject()(val servicesConfig: ServicesConfig) extends AppConfig with FeatureSwitching {
 
   private def loadConfig(key: String) = servicesConfig.getString(key)
 
@@ -51,6 +51,7 @@ class FrontendAppConfig @Inject()(val servicesConfig: ServicesConfig, runModeCon
   lazy val personalDetailsValidationFrontendUrl: String = loadConfig("microservice.services.personal-details-validation-frontend.url")
   lazy val emailVerificationBaseUrl: String = servicesConfig.baseUrl("email-verification")
   lazy val getRegistrationInformationUrl: String = s"$backendHost/vatreg/traffic-management/reg-info"
+  lazy val soleTraderIdentificationHost: String = servicesConfig.baseUrl("sole-trader-identification")
 
   def storeNrsPayloadUrl(regId: String): String = s"$backendHost/vatreg/$regId/nrs-payload"
 
@@ -76,10 +77,7 @@ class FrontendAppConfig @Inject()(val servicesConfig: ServicesConfig, runModeCon
   lazy val loginUrl = s"$companyAuthHost$loginPath"
   lazy val continueUrl = s"$loginCallback${routes.SignInOutController.postSignIn()}"
 
-  final lazy val defaultOrigin: String = {
-    lazy val appName = runModeConfiguration.getOptional[String]("appName").getOrElse("undefined")
-    runModeConfiguration.getOptional[String]("sosOrigin").getOrElse(appName)
-  }
+  final lazy val defaultOrigin: String = servicesConfig.getString("appName")
 
   private def loadStringConfigBase64(key: String): String = {
     new String(Base64.getDecoder.decode(servicesConfig.getString(key)), Charset.forName("UTF-8"))
@@ -132,14 +130,14 @@ class FrontendAppConfig @Inject()(val servicesConfig: ServicesConfig, runModeCon
     if (isEnabled(StubSoleTraderIdentification)) {
       s"$host/register-for-vat/test-only/sole-trader-identification/$journeyId"
     } else {
-      ???
+      s"$soleTraderIdentificationHost/sole-trader-identification/journey/$journeyId"
     }
 
   def getSoleTraderIdentificationJourneyUrl: String =
     if (isEnabled(StubSoleTraderIdentification)) {
       s"$host/register-for-vat/test-only/sole-trader-identification"
     } else {
-      ???
+      s"$soleTraderIdentificationHost/sole-trader-identification/journey"
     }
 
   def getSoleTraderIdentificationCallbackUrl: String = ???

@@ -27,7 +27,7 @@ import models.view.ApplicantDetails
 import play.api.http.Status._
 import play.api.libs.json.{Format, JsObject, JsValue, Json}
 import uk.gov.hmrc.http._
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -140,7 +140,7 @@ class VatRegistrationConnector @Inject()(val http: HttpClient,
         case OK => Success
       }
     } recover {
-      case e: Upstream5xxResponse => SubmissionFailedRetryable
+      case UpstreamErrorResponse(_, status, _, _) if status >= 500 && status <= 599  => SubmissionFailedRetryable
       case _ => SubmissionFailed
     }
   }

@@ -60,11 +60,11 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
       mockHttpFailedPOSTEmpty[HttpResponse]("tst-url", forbidden)
       connector.createNewRegistration failedWith forbidden
     }
-    "return an Upstream4xxResponse" in new Setup {
+    "return an UpstreamErrorResponse" in new Setup {
       mockHttpFailedPOSTEmpty[HttpResponse]("tst-url", upstream4xx)
       connector.createNewRegistration failedWith upstream4xx
     }
-    "return Upstream5xxResponse" in new Setup {
+    "return UpstreamErrorResponse" in new Setup {
       mockHttpFailedPOSTEmpty[HttpResponse]("tst-url", upstream5xx)
       connector.createNewRegistration failedWith upstream5xx
     }
@@ -204,12 +204,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     )
 
     "return the correct Http response when the microservice completes and returns a BusinessContact model" in new Setup {
-      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Some(businessContactJson)))
+      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Json.stringify(businessContactJson)))
       connector.getBusinessContact returnsSome expectedModel
     }
 
     "returns None if a 204 is recieved" in new Setup {
-      mockHttpGET[HttpResponse]("tst-url", HttpResponse(204, Some(Json.obj())))
+      mockHttpGET[HttpResponse]("tst-url", HttpResponse(204, ""))
       connector.getBusinessContact returnsNone
     }
 
@@ -231,7 +231,7 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     val vatThreshold = optVoluntaryRegistration
 
     "return the correct VatResponse when the microservice completes and returns a Threshold model" in new Setup {
-      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Some(Json.toJson(vatThreshold))))
+      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Json.stringify(Json.toJson(vatThreshold))))
       connector.getThreshold("tstID") returns vatThreshold
     }
     "return the correct VatResponse when a Forbidden response is returned by the microservice" in new Setup {
@@ -276,13 +276,13 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     }
     "return a SubmissionFailed" in new Setup {
       when(mockHttpClient.PUT[String, HttpResponse](anyString(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new Upstream4xxResponse("400", 400, 400)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("400", 400, 400)))
 
       await(connector.submitRegistration("tstID", Map.empty)) mustBe SubmissionFailed
     }
     "return a SubmissionFailedRetryable" in new Setup {
       when(mockHttpClient.PUT[String, HttpResponse](anyString(), any(), any())(any(), any(), any(), any()))
-        .thenReturn(Future.failed(new Upstream5xxResponse("502", 502, 502)))
+        .thenReturn(Future.failed(UpstreamErrorResponse("502", 502, 502)))
 
       await(connector.submitRegistration("tstID", Map.empty)) mustBe SubmissionFailedRetryable
     }
@@ -294,14 +294,14 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     val turnoverEstimates = TurnoverEstimates(1000L)
 
     "return turnover estimates if they are returned from the backend" in new Setup {
-      mockHttpGET[HttpResponse](testUrl, HttpResponse(200, Some(jsonBody)))
+      mockHttpGET[HttpResponse](testUrl, HttpResponse(200, Json.stringify(jsonBody)))
 
       val result: Option[TurnoverEstimates] = await(connector.getTurnoverEstimates)
       result mustBe Some(turnoverEstimates)
     }
 
     "return None if turnover estimates can't be found in the backend for the supplied regId" in new Setup {
-      mockHttpGET[HttpResponse](testUrl, HttpResponse(204))
+      mockHttpGET[HttpResponse](testUrl, HttpResponse(204, ""))
 
       val result: Option[TurnoverEstimates] = await(connector.getTurnoverEstimates)
       result mustBe None
@@ -320,8 +320,8 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
          |  "dob": "1998-07-12",
          |  "nino": "AA112233Z"
          |}""".stripMargin)
-    val httpRespOK = HttpResponse(OK, Some(validJson))
-    val httpRespNOCONTENT = HttpResponse(NO_CONTENT, None)
+    val httpRespOK = HttpResponse(OK, Json.stringify(validJson))
+    val httpRespNOCONTENT = HttpResponse(NO_CONTENT, "None")
 
     "return a JsValue" in new Setup {
       mockHttpGET[HttpResponse]("tst-url", httpRespOK)
@@ -338,12 +338,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
       connector.getApplicantDetails(testRegId) failedWith notFound
     }
 
-    "throw an Upstream4xxResponse with Forbidden status" in new Setup {
+    "throw an UpstreamErrorResponse with Forbidden status" in new Setup {
       mockHttpFailedGET[HttpResponse]("tst-url", forbidden)
       connector.getApplicantDetails(testRegId) failedWith forbidden
     }
 
-    "throw an Upstream5xxResponse with Internal Server Error status" in new Setup {
+    "throw an UpstreamErrorResponse with Internal Server Error status" in new Setup {
       mockHttpFailedGET[HttpResponse]("tst-url", internalServerError)
       connector.getApplicantDetails(testRegId) failedWith internalServerError
     }
@@ -408,12 +408,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
       connector.patchApplicantDetails(partialApplicantDetails) failedWith notFound
     }
 
-    "throw an Upstream4xxResponse with Forbidden status" in new Setup {
+    "throw an UpstreamErrorResponse with Forbidden status" in new Setup {
       mockHttpFailedPATCH[JsValue, JsValue]("tst-url", forbidden)
       connector.patchApplicantDetails(partialApplicantDetails) failedWith forbidden
     }
 
-    "throw an Upstream5xxResponse with Internal Server Error status" in new Setup {
+    "throw an UpstreamErrorResponse with Internal Server Error status" in new Setup {
       mockHttpFailedPATCH[JsValue, JsValue]("tst-url", internalServerError)
       connector.patchApplicantDetails(partialApplicantDetails) failedWith internalServerError
     }
@@ -439,8 +439,8 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
          |    "displayDetails": "test Details"
          |  }
          |}""".stripMargin)
-    val httpRespOK = HttpResponse(OK, Some(validJson))
-    val httpRespNOCONTENT = HttpResponse(NO_CONTENT, None)
+    val httpRespOK = HttpResponse(OK, Json.stringify(validJson))
+    val httpRespNOCONTENT = HttpResponse(NO_CONTENT, "")
 
     "return a JsValue" in new Setup {
       mockHttpGET[HttpResponse]("tst-url", httpRespOK)
@@ -457,12 +457,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
       connector.getSicAndCompliance failedWith notFound
     }
 
-    "throw an Upstream4xxResponse with Forbidden status" in new Setup {
+    "throw an UpstreamErrorResponse with Forbidden status" in new Setup {
       mockHttpFailedGET[HttpResponse]("tst-url", forbidden)
       connector.getSicAndCompliance failedWith forbidden
     }
 
-    "throw an Upstream5xxResponse with Internal Server Error status" in new Setup {
+    "throw an UpstreamErrorResponse with Internal Server Error status" in new Setup {
       mockHttpFailedGET[HttpResponse]("tst-url", internalServerError)
       connector.getSicAndCompliance failedWith internalServerError
     }
@@ -515,12 +515,12 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
       connector.updateSicAndCompliance(sicAndCompliance) failedWith notFound
     }
 
-    "throw an Upstream4xxResponse with Forbidden status" in new Setup {
+    "throw an UpstreamErrorResponse with Forbidden status" in new Setup {
       mockHttpFailedPATCH[JsValue, JsValue]("tst-url", forbidden)
       connector.updateSicAndCompliance(sicAndCompliance) failedWith forbidden
     }
 
-    "throw an Upstream5xxResponse with Internal Server Error status" in new Setup {
+    "throw an UpstreamErrorResponse with Internal Server Error status" in new Setup {
       mockHttpFailedPATCH[JsValue, JsValue]("tst-url", internalServerError)
       connector.updateSicAndCompliance(sicAndCompliance) failedWith internalServerError
     }
@@ -610,7 +610,7 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
   "Calling saveTransactionID" should {
     "succeed" when {
       "saving a transactionID" in new Setup {
-        mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(200))
+        mockHttpPATCH[String, HttpResponse]("tst-url", HttpResponse(200, ""))
         val resp: HttpResponse = await(connector.saveTransactionId("tstID", "transID"))
 
         resp.status mustBe 200
@@ -618,8 +618,8 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
     }
     "fail" when {
       "saving a transactionID" in new Setup {
-        mockHttpFailedPATCH[String, HttpResponse]("tst-url", new Upstream4xxResponse("400", 400, 400))
-        intercept[Upstream4xxResponse](await(connector.saveTransactionId("tstID", "transID")))
+        mockHttpFailedPATCH[String, HttpResponse]("tst-url", UpstreamErrorResponse("400", 400, 400))
+        intercept[UpstreamErrorResponse](await(connector.saveTransactionId("tstID", "transID")))
       }
     }
   }
@@ -627,7 +627,7 @@ class VatRegistrationConnectorSpec extends VatRegSpec with VatRegistrationFixtur
   "getEligibilityData" should {
     "return 200 and a JsObject" in new Setup {
       val json = Json.obj("foo" -> "bar")
-      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Some(json)))
+      mockHttpGET[HttpResponse]("tst-url", HttpResponse(200, Json.stringify(json)))
       connector.getEligibilityData returns json
     }
 

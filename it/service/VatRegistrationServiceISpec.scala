@@ -17,7 +17,6 @@
 package service
 
 import java.util.UUID
-
 import common.enums.VatRegStatus
 import connectors._
 import itutil.{IntegrationSpecBase, WiremockHelper}
@@ -26,8 +25,7 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import services.VatRegistrationService
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.SessionId
+import uk.gov.hmrc.http.{HeaderCarrier, SessionId}
 import play.api.test.Helpers._
 
 class VatRegistrationServiceISpec extends IntegrationSpecBase {

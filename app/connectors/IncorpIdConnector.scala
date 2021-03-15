@@ -22,7 +22,7 @@ import models.external.incorporatedentityid.{IncorpIdJourneyConfig, Incorporatio
 import play.api.http.Status.CREATED
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, InternalServerException}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.HttpClient
 import uk.gov.hmrc.http.HttpReads.Implicits.{readRaw, readFromJson}
 
 import scala.concurrent.{ExecutionContext, Future}

@@ -24,7 +24,7 @@ import play.api.i18n.{Lang, MessagesApi}
 import play.api.mvc.Call
 import services.AddressLookupService
 import support.AppAndStubs
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, Upstream5xxResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException, UpstreamErrorResponse}
 import play.api.test.Helpers._
 
 class AddressLookupConnectorISpec extends IntegrationSpecBase with AppAndStubs {
@@ -92,12 +92,12 @@ class AddressLookupConnectorISpec extends IntegrationSpecBase with AppAndStubs {
       }
     }
 
-    "throw Upstream5xxResponse exception" when {
+    "throw UpstreamErrorResponse exception" when {
       "ALF fails to handle the request" in {
         given()
           .alfeJourney.failedToInitialise()
 
-        intercept[Upstream5xxResponse] {
+        intercept[UpstreamErrorResponse] {
           await(alfConnector.getOnRampUrl(journeyModel))
         }
       }

@@ -69,11 +69,11 @@ trait VatRegistrationFixture extends FlatRateFixtures with TradingDetailsFixture
   val formattedThreshold = "50,000"
 
   //Responses
-  val forbidden = Upstream4xxResponse(FORBIDDEN.toString, FORBIDDEN, FORBIDDEN)
-  val noContent = HttpResponse(204)
-  val upstream4xx = Upstream4xxResponse(IM_A_TEAPOT.toString, IM_A_TEAPOT, IM_A_TEAPOT)
-  val upstream5xx = Upstream5xxResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
-  val validHttpResponse = HttpResponse(OK)
+  val forbidden = UpstreamErrorResponse(FORBIDDEN.toString, FORBIDDEN, FORBIDDEN)
+  val noContent = HttpResponse(204, "")
+  val upstream4xx = UpstreamErrorResponse(IM_A_TEAPOT.toString, IM_A_TEAPOT, IM_A_TEAPOT)
+  val upstream5xx = UpstreamErrorResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
+  val validHttpResponse = HttpResponse(OK, "")
 
   // CacheMap from S4l
   val validCacheMap = CacheMap("fooBarWizzBand", Map("foo" -> Json.toJson("wizz")))
@@ -83,7 +83,7 @@ trait VatRegistrationFixture extends FlatRateFixtures with TradingDetailsFixture
   val notFound = new NotFoundException(NOT_FOUND.toString)
   val internalServiceException = new InternalServerException(BAD_GATEWAY.toString)
   val runTimeException = new RuntimeException("tst")
-  val internalServerError = Upstream5xxResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
+  val internalServerError = UpstreamErrorResponse(INTERNAL_SERVER_ERROR.toString, INTERNAL_SERVER_ERROR, INTERNAL_SERVER_ERROR)
   val exception = new Exception(BAD_GATEWAY.toString)
 
   //Test variables
