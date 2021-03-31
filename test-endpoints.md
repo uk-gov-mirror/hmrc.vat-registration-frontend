@@ -28,5 +28,5 @@ this will load some applicant details and home addresses into II Frontend Stub.
 inserts the required data directly into II through our backend which will essentially incorporate which ever user you are authenticated as via their transaction ID, used for testing post incorporated journeys.
 
 `GET         /incorp-info`  
-returns JSON retrieved from our backend - whatever incorporation status we hold, can be checked in the browser
+returns JSON retrieved from our backend - whatever incorporation status we hold, can be checked in the browser.
 
