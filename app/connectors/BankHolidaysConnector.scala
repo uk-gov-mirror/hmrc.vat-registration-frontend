@@ -16,24 +16,22 @@
 
 package connectors
 
-import java.io.InputStream
-
-import javax.inject.{Inject, Singleton}
 import play.api.Environment
 import play.api.libs.json.{Json, Reads}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import uk.gov.hmrc.time.workingdays.{BankHoliday, BankHolidaySet}
 import play.api.libs.json.JodaReads._
 import uk.gov.hmrc.http.HttpReads.Implicits.readFromJson
 
+import java.io.InputStream
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class WSBankHolidaysConnector @Inject()(http: HttpClient, config: ServicesConfig)
                                        (implicit ec: ExecutionContext) {
-
   protected implicit val bankHolidayReads: Reads[BankHoliday] = Json.reads[BankHoliday]
   protected implicit val bankHolidaySetReads: Reads[BankHolidaySet] = Json.reads[BankHolidaySet]
 

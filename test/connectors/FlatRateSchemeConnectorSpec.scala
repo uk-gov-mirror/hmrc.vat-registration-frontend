@@ -55,7 +55,7 @@ class FlatRateSchemeConnectorSpec extends VatRegSpec with VatRegistrationFixture
 
   "Calling upsertFlatRate" should {
     "return the correct VatResponse when the microservice completes and returns a FlatRateScheme model" in new Setup {
-      val resp = HttpResponse(200)
+      val resp = HttpResponse(200, "{}")
 
       mockHttpPATCH[FlatRateScheme, HttpResponse]("tst-url", resp)
       connector.upsertFlatRate("tstID", fullS4L) returns resp
@@ -97,7 +97,7 @@ class FlatRateSchemeConnectorSpec extends VatRegSpec with VatRegistrationFixture
       connector.getFlatRate("tstID") failedWith forbidden
     }
     "return a Not Found S4LFlatRateScheme when the microservice returns a NoContent response (No VatRegistration in database)" in new Setup {
-      val resp = HttpResponse(204)
+      val resp = HttpResponse(204, "{}")
 
       mockHttpGET[HttpResponse]("tst-url", resp)
       connector.getFlatRate("tstID") returns None
@@ -111,7 +111,7 @@ class FlatRateSchemeConnectorSpec extends VatRegSpec with VatRegistrationFixture
 
   "Calling clearFlatRate" should {
     "return the correct VatResponse when the microservice completes and clears flat rate" in new Setup {
-      val resp = HttpResponse(200)
+      val resp = HttpResponse(200, "{}")
 
       mockHttpDELETE[HttpResponse]("tst-url", resp)
       connector.clearFlatRate("tstID") returns resp

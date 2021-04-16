@@ -20,11 +20,10 @@ import org.mockito.Mockito.when
 import org.mockito.stubbing.OngoingStubbing
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Writes
-import uk.gov.hmrc.http.{HeaderCarrier, HttpReads}
-import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpReads}
 import org.mockito.{ArgumentMatchers => Matchers}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait HttpClientMock {
   this: MockitoSugar =>
@@ -32,7 +31,7 @@ trait HttpClientMock {
   lazy val mockHttpClient = mock[HttpClient]
 
   def mockHttpGET[T](url: String, thenReturn: T): OngoingStubbing[Future[T]] = {
-    when(mockHttpClient.GET[T](Matchers.anyString())(Matchers.any[HttpReads[T]], Matchers.any[HeaderCarrier], Matchers.any()))
+    when(mockHttpClient.GET[T](Matchers.anyString())(Matchers.any[HttpReads[T]], Matchers.any[HeaderCarrier], Matchers.any[ExecutionContext]))
       .thenReturn(Future.successful(thenReturn))
   }
 
