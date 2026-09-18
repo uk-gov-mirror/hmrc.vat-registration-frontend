@@ -47,34 +47,41 @@ class UploadDocumentNewJourneyViewSpec extends VatRegViewSpec {
     val genericFileUploadError = "Error: The selected file could not be uploaded"
   }
 
-  val formTypes: Seq[(AttachmentType, String, String, String)] = Seq(
-    (VAT2, "Upload your VAT2 form", "Download and find out more about VAT2 forms (opens in a new tab)", "https://www.gov.uk/government/publications/vat-partnership-details-vat2"),
-    (VAT51, "Upload your VAT 50/51 form", "Download and find out more about VAT 50/51 forms (opens in a new tab)", "https://www.gov.uk/government/publications/apply-for-vat-group-registration-or-amend-your-details"),
-    (TaxRepresentativeAuthorisation, "Upload your VAT1TR form", "Download and find out more about VAT1TR forms (opens in a new tab)", "https://www.gov.uk/government/publications/vat-appointment-of-tax-representative-vat1tr"),
-    (VAT5L, "Upload your VAT5L form", "Download and find out more about VAT5L forms (opens in a new tab)", "https://www.gov.uk/guidance/tell-hmrc-about-land-and-property-supplies-youre-making")
+  case class FormPage(attachmentType: AttachmentType, form: String, linkHref: String) {
+    val heading = s"Upload your $form form"
+    val linkText = s"Download and find out more about $form forms (opens in a new tab)"
+    val welshHeading = s"Uwchlwytho’ch ffurflen $form"
+    val welshLinkText = s"Lawrlwythwch ffurflen $form a dysgu rhagor amdani (yn agor tab newydd)"
+  }
+
+  val formPages: Seq[FormPage] = Seq(
+    FormPage(VAT2, "VAT2", "https://www.gov.uk/government/publications/vat-partnership-details-vat2"),
+    FormPage(VAT51, "VAT 50/51", "https://www.gov.uk/government/publications/apply-for-vat-group-registration-or-amend-your-details"),
+    FormPage(TaxRepresentativeAuthorisation, "VAT1TR", "https://www.gov.uk/government/publications/vat-appointment-of-tax-representative-vat1tr"),
+    FormPage(VAT5L, "VAT5L", "https://www.gov.uk/guidance/tell-hmrc-about-land-and-property-supplies-youre-making")
   )
 
-  formTypes.foreach { case (attachmentType, expectedHeading, expectedLinkText, expectedLinkHref) =>
+  formPages.foreach { page =>
 
-    s"The Upload Documents Page for $attachmentType" must {
+    s"The Upload Documents Page for ${page.attachmentType}" must {
       lazy val view: Html = uploadDocumentsPage(
         testUpscanResponse,
         Some(Html(ExpectedContent.testHint)),
-        attachmentType,
+        page.attachmentType,
         None
       )
       implicit val doc: Document = Jsoup.parse(view.body)
 
       "have the correct heading" in new ViewSetup {
-        doc.heading mustBe Some(expectedHeading)
+        doc.heading mustBe Some(page.heading)
       }
 
       "have the correct title" in new ViewSetup {
-        doc.title mustBe s"$expectedHeading - Register for VAT - GOV.UK"
+        doc.title mustBe s"${page.heading} - Register for VAT - GOV.UK"
       }
 
       "have the correct link text and href" in new ViewSetup {
-        doc.link(1) mustBe Some(Link(expectedLinkText, expectedLinkHref))
+        doc.link(1) mustBe Some(Link(page.linkText, page.linkHref))
       }
 
       "have the link open in a new tab" in new ViewSetup {
@@ -206,43 +213,46 @@ class UploadDocumentNewJourneyViewSpec extends VatRegViewSpec {
     }
   }
 
-  "The Upload Documents Page in Welsh for VAT2" must {
-    lazy val view: Html = uploadDocumentsPage(
-      testUpscanResponse,
-      Some(Html("Mae’n rhaid i’r ffeil fod ar ffurf JPG, BMP, PNG, PDF, DOC, DOCX, XLS, XLSX, GIF neu TXT.")),
-      VAT2,
-      None
-    )(request, welshMessages, appConfig)
-    implicit val doc: Document = Jsoup.parse(view.body)
+  formPages.foreach { page =>
 
-    "have the correct Welsh heading" in new ViewSetup {
-      doc.heading mustBe Some("Uwchlwytho’ch ffurflen VAT2")
-    }
+    s"The Upload Documents Page in Welsh for ${page.attachmentType}" must {
+      lazy val view: Html = uploadDocumentsPage(
+        testUpscanResponse,
+        Some(Html(ExpectedContent.testHint)),
+        page.attachmentType,
+        None
+      )(request, welshMessages, appConfig)
+      implicit val doc: Document = Jsoup.parse(view.body)
 
-    "have the correct Welsh link text" in new ViewSetup {
-      doc.link(1).map(_.text) mustBe Some("Lawrlwythwch ffurflen VAT2 a dysgu rhagor amdani (yn agor tab newydd)")
-    }
+      "have the correct Welsh heading" in new ViewSetup {
+        doc.heading mustBe Some(page.welshHeading)
+      }
 
-    "have the correct Welsh inset text" in new ViewSetup {
-      doc.panelIndent(1) mustBe Some("Mae’n rhaid i’r ffeil fod ar ffurf JPG, BMP, PNG, PDF, DOC, DOCX, XLS, XLSX, GIF neu TXT.")
-    }
+      "have the correct Welsh link text" in new ViewSetup {
+        doc.link(1).map(_.text) mustBe Some(page.welshLinkText)
+      }
 
-    "have the correct Welsh label" in new ViewSetup {
-      doc.select("main label.govuk-label").text() mustBe "Uwchlwytho ffeil"
-    }
+      "replace the old journey hint with the Welsh file type inset text" in new ViewSetup {
+        doc.panelIndent(1) mustBe Some("Mae’n rhaid i’r ffeil fod ar ffurf JPG, BMP, PNG, PDF, DOC, DOCX, XLS, XLSX, GIF neu TXT.")
+      }
 
-    "have the Welsh drop zone text from the HMRC design system file upload pattern" in new ViewSetup {
-      val dropZone = doc.select("main .govuk-drop-zone")
+      "have the correct Welsh label" in new ViewSetup {
+        doc.select("main label.govuk-label").text() mustBe "Uwchlwytho ffeil"
+      }
 
-      dropZone.attr("data-i18n.choose-files-button") mustBe "Dewis ffeil"
-      dropZone.attr("data-i18n.drop-instruction") mustBe "neu ollwng ffeil"
-      dropZone.attr("data-i18n.no-file-chosen") mustBe "Dim ffeil wedi’i dewis"
-      dropZone.attr("data-i18n.entered-drop-zone") mustBe "Yn y man gollwng"
-      dropZone.attr("data-i18n.left-drop-zone") mustBe "Wedi gadael y man gollwng"
-    }
+      "have the Welsh drop zone text from the HMRC design system file upload pattern" in new ViewSetup {
+        val dropZone = doc.select("main .govuk-drop-zone")
 
-    "have the correct Welsh submit button" in new ViewSetup {
-      doc.submitButton mustBe Some("Uwchlwytho")
+        dropZone.attr("data-i18n.choose-files-button") mustBe "Dewis ffeil"
+        dropZone.attr("data-i18n.drop-instruction") mustBe "neu ollwng ffeil"
+        dropZone.attr("data-i18n.no-file-chosen") mustBe "Dim ffeil wedi’i dewis"
+        dropZone.attr("data-i18n.entered-drop-zone") mustBe "Yn y man gollwng"
+        dropZone.attr("data-i18n.left-drop-zone") mustBe "Wedi gadael y man gollwng"
+      }
+
+      "have the correct Welsh submit button" in new ViewSetup {
+        doc.submitButton mustBe Some("Uwchlwytho")
+      }
     }
   }
 

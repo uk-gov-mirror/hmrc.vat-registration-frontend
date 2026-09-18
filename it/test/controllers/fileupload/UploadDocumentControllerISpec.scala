@@ -34,6 +34,11 @@ class UploadDocumentControllerISpec extends ControllerISpec {
 
   val testReference = "testReference"
 
+  override def afterEach(): Unit = {
+    super.afterEach()
+    disable(VrsNewAttachmentJourney)
+  }
+
   s"GET $url" must {
     "return an OK when there's an incomplete attachment" in new Setup {
       insertCurrentProfileIntoDb(currentProfile, sessionString)
@@ -61,7 +66,6 @@ class UploadDocumentControllerISpec extends ControllerISpec {
       insertCurrentProfileIntoDb(currentProfile, sessionString)
       val res: WSResponse = verifyDocumentUploadPage(url, VAT2)
       val doc = Jsoup.parse(res.body)
-      disable(VrsNewAttachmentJourney)
 
       doc.select("h1").text mustBe "Upload your VAT2 form"
       doc.getElementsByAttributeValue("href", appConfig.vat2Link).size mustBe 1
